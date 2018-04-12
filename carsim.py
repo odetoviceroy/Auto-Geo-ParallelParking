@@ -1,6 +1,7 @@
 import math as m
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 class Coordinate:
     def __init__(self,x,y):
@@ -53,29 +54,71 @@ def robot_draw_circle(radius, center):
 
     return [x_vals, y_vals]
 
+def c2_x(turn_radius, xm, xf):
+	radsq = turn_radius * turn_radius
+	q = m.sqrt(((xf.x - xm.x) * (xf.x - xm.x)) + ((xf.y - xm.y) * (xf.y - xm.y)))
+	x3 = (xf.x + xm.x) / 2
+	return x3 + m.sqrt(radsq - ((q / 2) * (q / 2))) * ((xf.y - xf.y) / q)
+
+def c2_y(turn_radius, xm, xf):
+	radsq = turn_radius * turn_radius
+	q = m.sqrt(((xf.x - xm.x) * (xf.x - xm.x)) + ((xf.y - xm.y) * (xf.y - xm.y)))
+	y3 = (xf.y + xm.y) / 2
+	return y3 + m.sqrt(radsq - ((q / 2) * (q / 2))) * ((xf.x-xm.x) / q)
+
+fig = plt.figure()
+ax = plt.axes(xlim = (-8,8), ylim = (-8,8))
+N = 2
+points = ax.plot(*([[], []]*N), color = 'green', linestyle ='--', marker = 'o')
+
+def animate(i):
+    points[0].set_data([i],[i])
+    points[1].set_data([i+1],[i+1])
+    
+    return points
+
+def init():
+    for line in points:
+        line.set_data([],[])
+    return points
 
 if __name__ == "__main__": # main function
-	turn_radius = get_turn_radius(m.pi/12)
-	movecar_axlept = Coordinate(5,10)
-	frontcar_up = Coordinate(5,5)
-	frontcar_down = Coordinate(5,.1)
+	turn_radius = get_turn_radius(m.pi/9)
+	movecar_axlept = Coordinate(4,10)
+	frontcar_up = Coordinate(4,5)
+	frontcar_down = Coordinate(4,.1)
 	backcar_up = Coordinate(0,5)
 	backcar_down = Coordinate(0,.1)
 
 	c1 = Coordinate(movecar_axlept.x, movecar_axlept.y - turn_radius)
 
+
 	parkspace_len = frontcar_up.x - backcar_up.x
 
 	xm = temp(parkspace_len, turn_radius, c1)
+	xf = Coordinate(0,(backcar_up.y - backcar_down.y) /2)
+
+	c2 = Coordinate( c2_x(turn_radius,xm,xf), c2_y(turn_radius,xm,xf) )
 
 	plot_graph(movecar_axlept, frontcar_up, frontcar_down, backcar_up, backcar_down, c1)
 
 	[x_vals, y_vals] = robot_draw_circle(turn_radius, c1)
 
+	[x_vals2, y_vals2] = robot_draw_circle(turn_radius, c2)
 	plt.plot(x_vals,y_vals, 'bo')
+	plt.plot(x_vals2,y_vals2, 'bo')
 
 	plt.plot([xm.x],[xm.y], "ko")
+	plt.plot([xf.x],[xf.y], "ko")
+
+	plt.plot([c1.x],[c1.y], "mo")
+	plt.plot([c2.x],[c2.y], "mo")
+
 	plt.xlabel('X')
 	plt.ylabel('Y')
+
+	ani = animation.FuncAnimation(fig, animate, init_func=init, frames=10, interval=100, blit=True)
+
+
 	plt.show()
 
