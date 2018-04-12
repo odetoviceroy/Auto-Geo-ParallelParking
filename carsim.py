@@ -2,10 +2,7 @@ import math as m
 import numpy as np
 import matplotlib.pyplot as plt
 
-class Coordinate:
-    def __init__(self,x,y):
-        self.x = x
-        self.y = y
+
 
 # What we are given: center point of the back axle of the moving car: movecar_axlept
 # D = length of the parking space: parkspace_len
