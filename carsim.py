@@ -36,37 +36,28 @@ def plot_graph(movecar_axlept, frontcar_up, frontcar_down, backcar_up, backcar_d
 	plt.plot(x,y, 'ro')
 	plt.autoscale()
 
-def gen_xy_vals(c, center_flag, theta, turn_radius):
-	time = [x*0.2 for x in range(0, 100)]
-	theta_list = []
+def robot_draw_circle(radius, center, theta):
+    time = [x*0.2 for x in range(0, 100)]
+    theta_list = []
+    for t in time:
+        theta_list.append(t * (theta)/12)
+    return theta_list
+
+def gen_xy_vals(center, center_flag, theta, turn_radius):
+	theta_list = robot_draw_circle(turn_radius, center, theta)
 	x_vals = []
 	y_vals = []
-	for t in time:
-		theta_list.append(t * (theta)/10)
 	if(center_flag == 1):
 		for i in range(0, len(theta_list)):
 			if(theta_list[i] <= theta and theta_list[i] >= m.pi/2):
-				x_vals.append(c.x + turn_radius * m.cos(theta_list[i]))
-				y_vals.append(c.y + turn_radius * m.sin(theta_list[i]))
+				x_vals.append(center.x + turn_radius * m.cos(theta_list[i]))
+				y_vals.append(center.y + turn_radius * m.sin(theta_list[i]))
 	if(center_flag == 2):
 		for i in range(0, len(theta_list)):
 			if(theta_list[i] >= theta + m.pi/3 and theta_list[i] <= 2 * m.pi):
-				x_vals.append(c.x + turn_radius * m.cos(theta_list[i]))
-				y_vals.append(c.y + turn_radius * m.sin(theta_list[i]))
+				x_vals.append(center.x + turn_radius * m.cos(theta_list[i]))
+				y_vals.append(center.y + turn_radius * m.sin(theta_list[i]))
 	return [x_vals, y_vals]    
-
-def robot_draw_circle(radius, center):
-    time = [x*0.2 for x in range(0, 51)]
-    theta = []
-    x_vals = []
-    y_vals = []
-    for t in time:
-        theta.append(t * (2 * m.pi)/10)
-    for i in range(0, len(theta)):
-        x_vals.append(center.x + radius * m.cos(theta[i]))
-        y_vals.append(center.y + radius * m.sin(theta[i]))
-
-    return [x_vals, y_vals]
 
 def get_c2(turn_radius, xm, xf):
 	radsq = turn_radius * turn_radius
@@ -118,14 +109,10 @@ if __name__ == "__main__": # main function
 	c1 = Coordinate(movecar_axlept.x, movecar_axlept.y - turn_radius)
 	theta = get_theta(parkspace_len, turn_radius)
 	xm = get_middlept(parkspace_len, turn_radius, c1, theta)
-	xf = Coordinate(0,(backcar_up.y - backcar_down.y) /2)
-
+	xf = Coordinate(0,(backcar_up.y - backcar_down.y + 0.5) /2)
 	c2 = get_c2(turn_radius, xm, xf)
-
 	plot_graph(movecar_axlept, frontcar_up, frontcar_down, backcar_up, backcar_down, c1)
 
-	[x_vals, y_vals] = robot_draw_circle(turn_radius, c1)
-	[x_vals2, y_vals2] = robot_draw_circle(turn_radius, c2)
 	[arc1x_vals, arc1y_vals] = gen_xy_vals(c1, 1, theta, turn_radius)
 	[arc2x_vals, arc2y_vals] = gen_xy_vals(c2, 2, theta, turn_radius)
 	[FINALX_VALS, FINALY_VALS] = trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals)
