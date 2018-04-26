@@ -73,7 +73,7 @@ def gen_xy_vals(center, center_flag, theta, turn_radius):
 				y_vals.append(center.y + turn_radius * m.sin(theta_list[i]))
 	if(center_flag == 2):
 		for i in range(0, len(theta_list)):
-			if(theta_list[i] >= theta + m.pi/3 and theta_list[i] <= 2 * m.pi):
+			if(theta_list[i] >= theta + m.pi/3 and theta_list[i] <= (2 * m.pi) - (m.pi/9)):
 				x_vals.append(center.x + turn_radius * m.cos(theta_list[i]))
 				y_vals.append(center.y + turn_radius * m.sin(theta_list[i]))
 	return [x_vals, y_vals]    
@@ -158,6 +158,34 @@ if __name__ == "__main__": # main function
 	c1 = Coordinate(backaxle_midpt.x, backaxle_midpt.y - turn_radius)
 	theta = get_theta(parkspace_len, turn_radius)
 	# -----------------------------------------------------------------------------
+	# -----------------------------------------------------------------------------
+	xm = get_middlept(parkspace_len, turn_radius, c1, theta)
+	e_len = 0.8 # use this to get the closest we can get to the back car
+	xf = Coordinate(backcar.f_up.x + e_len, (backcar.f_up.y - backcar.f_down.y) /2)
+	c2 = get_c2(turn_radius, xm, xf)
+	# -----------------------------------------------------------------------------
+	# -----------------------------------------------------------------------------
+	[arc1x_vals, arc1y_vals] = gen_xy_vals(c1, 1, theta, turn_radius)
+	[arc2x_vals, arc2y_vals] = gen_xy_vals(c2, 2, theta, turn_radius)
+	[FINALX_VALS, FINALY_VALS] = trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals)
+
+	'''
+	theta_list = robot_draw_circle(turn_radius, c2, theta)
+	lolx = []
+	loly = []
+	for i in range(len(theta_list) - 1, -1, -1):
+
+		lolx.append(c2.x + turn_radius * m.cos(theta_list[i]))
+		loly.append(c2.y + turn_radius * m.sin(theta_list[i]))
+	plt.plot([lolx],[loly], "c8")
+	plt.plot([lolx[10]],[loly[10]], "ro")
+	'''
+	plt.plot([FINALX_VALS],[FINALY_VALS], "m+")
+	total_len = len(arc1x_vals) + len(arc2x_vals)
+	# -----------------------------------------------------------------------------
+	print "LEN(ARC1X_VALS)", len(arc1x_vals), "\nLEN(ARC2X_VALS):", len(arc2x_vals)
+	# -----------------------------------------------------------------------------
+	# -----------------------------------------------------------------------------
 	[fx, fy] = frontcar.genGraphPts()
 	[bx, by] = backcar.genGraphPts()
 	[move_x, move_y] = movecar.genGraphPts()
@@ -169,32 +197,21 @@ if __name__ == "__main__": # main function
 	plt.plot([move_x],[move_y], "ro")
 	plt.plot([backaxle_midpt.x],[backaxle_midpt.y], "bo")
 	plt.plot([frontaxle_midpt.x],[frontaxle_midpt.y], "bo")
+	plt.plot([c1.x,xm.x,c2.x,xf.x],[c1.y,xm.y,c2.y,xf.y],"mp")
 
 
 	plt.show()
 
 	'''
-	
-	
-	xm = get_middlept(parkspace_len, turn_radius, c1, theta)
-	xf = Coordinate(0,(backcar_up.y - backcar_down.y + 0.5) /2)
-	c2 = get_c2(turn_radius, xm, xf)
-	plot_graph(movecar_axlept, frontcar_up, frontcar_down, backcar_up, backcar_down, c1)
-
-	[arc1x_vals, arc1y_vals] = gen_xy_vals(c1, 1, theta, turn_radius)
-	[arc2x_vals, arc2y_vals] = gen_xy_vals(c2, 2, theta, turn_radius)
-	[FINALX_VALS, FINALY_VALS] = trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals)
 
 	plt.plot([xm.x],[xm.y], "ko")
 	plt.plot([xf.x],[xf.y], "ko")
 	plt.plot([c1.x],[c1.y], "mo")
 	plt.plot([c2.x],[c2.y], "mo")
-	plt.plot([FINALX_VALS],[FINALY_VALS], "m+")
 	plt.xlabel('X')
 	plt.ylabel('Y')
 
-	total_len = len(arc1x_vals) + len(arc2x_vals)
-	print "LEN(ARC1X_VALS)", len(arc1x_vals), "\nLEN(ARC2X_VALS):", len(arc2x_vals)
+	
 
 	ani = animation.FuncAnimation(fig, animate, init_func=init, frames= total_len, fargs = (
 		FINALX_VALS,
