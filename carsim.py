@@ -20,7 +20,6 @@ class Coordinate:
 # X1 = position of movecar_axlept when the back axle and the back of the front car are aligned
 
 def get_turn_radius(steer_ang):
-    return 1 / m.tan(steer_ang)  # this is in radians
 
 
 def get_theta(parkspace_len, turn_radius):
