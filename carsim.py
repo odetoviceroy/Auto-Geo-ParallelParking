@@ -112,10 +112,10 @@ def animate(i, FINALX_VALS, FINALY_VALS, theta):
 
 if __name__ == "__main__": # main function
 	movecar_axlept = Coordinate(4,10)
-	len_car = 3 # static length of a car
+	len_car = 3.0 # static length of a car
 	# ----------- LET'S DEFINE THE COORDINATES OF THE FRONT STATIC CAR -----------
 	frontcar = Car(
-		Coordinate(0,0), Coordinate(0,0), Coordinate(4,5), Coordinate(4,.1)
+		Coordinate(0,0), Coordinate(0,0), Coordinate(6,5), Coordinate(6,.1)
 		)
 
 	frontcar.f_up.x = frontcar.b_up.x + len_car
@@ -135,20 +135,30 @@ if __name__ == "__main__": # main function
 	parkspace_len = frontcar.b_up.x - backcar.f_up.x # DEFINE PARKING SPACE LENGTH
 	width_car = frontcar.b_up.y - frontcar.b_down.y
 	len_moveto_fup = 5 # LENGTH OF BACK OF MOVING CAR TO FRONT STATIC CAR
-	bottom_coordy = frontcar.b_up.y + len_moveto_fup
+
+	bbotm_coordy = frontcar.b_up.y + len_moveto_fup
+	btop_coordy = bbotm_coordy + width_car
+	fbotm_coordy = frontcar.f_up.y + len_moveto_fup
+	ftop_coordy = fbotm_coordy + width_car
 	# --------- DEFINE ALL PRELIMINARY COMPUTATIONS OF THE MOVING CAR ------------
 	movecar = Car(
-		Coordinate(0,0), Coordinate(0,0), Coordinate(0,0), Coordinate(0,0)
+		Coordinate(frontcar.f_up.x,ftop_coordy), Coordinate(frontcar.f_up.x,fbotm_coordy), 
+		Coordinate(frontcar.b_up.x,btop_coordy), Coordinate(frontcar.b_up.x,bbotm_coordy)
 	)
 
+	lencar_part = len_car / 5.0
+	backaxle_midpt = Coordinate(frontcar.b_up.x + lencar_part, bbotm_coordy + (width_car / 2))
 
 	[fx, fy] = frontcar.genGraphPts()
 	[bx, by] = backcar.genGraphPts()
 	[move_x, move_y] = movecar.genGraphPts()
 
+	print move_x, "\t", move_y
+	print backaxle_midpt.x, ", ", backaxle_midpt.y
 	plt.plot([fx],[fy], "mo")
 	plt.plot([bx],[by], "go")
 	plt.plot([move_x],[move_y], "ro")
+	plt.plot([backaxle_midpt.x],[backaxle_midpt.y], "bo")
 
 	plt.show()
 	#turn_radius = get_turn_radius(m.pi/9)
