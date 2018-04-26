@@ -4,11 +4,18 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import matplotlib.patches as patches
 
-
 class Coordinate:
     def __init__(self,x,y):
         self.x = x
         self.y = y
+
+class Car:
+	def __init__(self, front_up, front_down, back_up, back_down):
+		self.front_up = front_up
+		self.front_down = front_down
+		self.back_up = back_up
+		self.back_down = back_down
+
 
 # What we are given: center point of the back axle of the moving car: movecar_axlept
 # D = length of the parking space: parkspace_len
@@ -18,6 +25,19 @@ class Coordinate:
 # X0 = position of movecar_axlept when the back of the cars are aligned
 # X1 = position of movecar_axlept when the back axle and the back of the front car are aligned
 
+# Let's define more variables: movecar_backaxle, movecar_frontaxle (describe positions of front and back axle of moving car)
+# We can therefore define len_axle as the length between the front and back axle of moving car
+# Let's also define the width and length of the actual car, CAR_WIDTH, CAR_LENGTH
+
+movecar_axlept = Coordinate(4,10)
+
+frontcar_up = Coordinate(4,5)
+frontcar_down = Coordinate(4,.1)
+backcar_up = Coordinate(0,5)
+backcar_down = Coordinate(0,.1)
+
+
+
 def get_turn_radius(steer_ang):
 	return 1 / m.tan(steer_ang) # this is in radians
 
@@ -25,7 +45,8 @@ def get_theta(parkspace_len, turn_radius):
 	return m.pi + m.asin(parkspace_len/ (2 * turn_radius))
 
 def get_middlept(parkspace_len, turn_radius, c1, theta): 
-	print "PARK SPACE LEN: ", parkspace_len, "\nTURN RADIUS: ", turn_radius, "\nTHETA: ", theta, "\nEND COORDINATE OF C1 (", c1.x, ",", c1.y, ")"
+	print "PARK SPACE LEN: ", parkspace_len, "\nTURN RADIUS: ", turn_radius, "\nTHETA: ", 
+	print theta, "\nEND COORDINATE OF C1 (", c1.x, ",", c1.y, ")"
 	xm = Coordinate(c1.x + (turn_radius * m.cos(theta)), c1.y + (turn_radius * m.sin(theta) ))
 	print "END COORDINATE OF XM: (", xm.x, ", ", xm.y, " )"
 	return xm
@@ -82,8 +103,6 @@ def trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals):
 
 fig = plt.figure()
 ax = plt.axes(xlim = (-8,8), ylim = (-8,8))
-N = 2
-points = ax.plot(*([[], []]*N), color = 'green', linestyle ='--', marker = 'o')
 patch = patches.Rectangle((0, 0), 0, 0, fc='y')
 
 def init():
@@ -99,11 +118,6 @@ def animate(i, FINALX_VALS, FINALY_VALS, theta):
 
 if __name__ == "__main__": # main function
 	turn_radius = get_turn_radius(m.pi/9)
-	movecar_axlept = Coordinate(4,10)
-	frontcar_up = Coordinate(4,5)
-	frontcar_down = Coordinate(4,.1)
-	backcar_up = Coordinate(0,5)
-	backcar_down = Coordinate(0,.1)
 	parkspace_len = frontcar_up.x - backcar_up.x
 
 	c1 = Coordinate(movecar_axlept.x, movecar_axlept.y - turn_radius)
