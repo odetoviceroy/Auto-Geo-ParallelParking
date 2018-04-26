@@ -33,8 +33,7 @@ class Car:
 # Let's also define the width and length of the actual car, CAR_WIDTH, CAR_LENGTH
 
 fig = plt.figure()
-# ax = plt.axes(xlim = (-8,8), ylim = (-8,8))
-patch = patches.Rectangle((0, 0), 0, 0, fc='y')
+ax = plt.axes(xlim = (-5,10), ylim = (-10,20))
 
 def get_turn_radius(axle_len, steer_ang):
 	return axle_len / m.tan(steer_ang) # this is in radians
@@ -101,17 +100,18 @@ def trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals):
 
 def init():
 	ax.add_patch(patch)
-	return patch,
+	ax.add_patch(patch2)
+	ax.add_patch(patch3)
+	return patch, patch2, patch3 
 
-def animate(i, FINALX_VALS, FINALY_VALS, theta):
-	patch.set_width(1.2)
-	patch.set_height(1.0)
+def animate(i, FINALX_VALS, FINALY_VALS, theta, f_bup, f_bdown, b_bup, b_bdown, steer_angle):
 	patch.set_xy([FINALX_VALS[i], FINALY_VALS[i]])
-	patch._angle = -np.rad2deg(theta)
-	return patch,
+	patch2.set_xy([f_bup,f_bdown])
+	patch3.set_xy([b_bup,b_bdown])
+	patch._angle = -np.rad2deg(steer_angle)
+	return patch, patch2, patch3
 
 if __name__ == "__main__": # main function
-	movecar_axlept = Coordinate(4,10)
 	len_car = 3.0 # static length of a car
 	# ----------- LET'S DEFINE THE COORDINATES OF THE FRONT STATIC CAR -----------
 	frontcar = Car(
@@ -185,6 +185,8 @@ if __name__ == "__main__": # main function
 	# -----------------------------------------------------------------------------
 	print "LEN(ARC1X_VALS)", len(arc1x_vals), "\nLEN(ARC2X_VALS):", len(arc2x_vals)
 	# -----------------------------------------------------------------------------
+	test_coord = Coordinate(movecar.b_down.x, movecar.b_down.y)
+	plt.plot([test_coord.x],[test_coord.y], "b^")
 	# -----------------------------------------------------------------------------
 	[fx, fy] = frontcar.genGraphPts()
 	[bx, by] = backcar.genGraphPts()
@@ -199,24 +201,22 @@ if __name__ == "__main__": # main function
 	plt.plot([frontaxle_midpt.x],[frontaxle_midpt.y], "bo")
 	plt.plot([c1.x,xm.x,c2.x,xf.x],[c1.y,xm.y,c2.y,xf.y],"mp")
 
-
-	plt.show()
-
-	'''
-
-	plt.plot([xm.x],[xm.y], "ko")
-	plt.plot([xf.x],[xf.y], "ko")
-	plt.plot([c1.x],[c1.y], "mo")
-	plt.plot([c2.x],[c2.y], "mo")
-	plt.xlabel('X')
-	plt.ylabel('Y')
-
-	
+	patch = patches.Rectangle((0, 0), len_car, width_car, fc='indianred')
+	patch2 = patches.Rectangle((frontcar.b_down.x, frontcar.b_down.y), len_car, width_car, fc='rebeccapurple')
+	patch3 = patches.Rectangle((backcar.b_down.x, backcar.b_down.y), len_car, width_car, fc='limegreen')
 
 	ani = animation.FuncAnimation(fig, animate, init_func=init, frames= total_len, fargs = (
 		FINALX_VALS,
 		FINALY_VALS,
 		theta,
+		frontcar.b_down.x,
+		frontcar.b_down.y,
+		backcar.b_down.x,
+		backcar.b_down.y,
+		steer_angle
 		), interval=100, blit=True)
+	plt.autoscale()
 	plt.show()
-	'''
+
+
+	
