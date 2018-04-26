@@ -36,8 +36,8 @@ fig = plt.figure()
 # ax = plt.axes(xlim = (-8,8), ylim = (-8,8))
 patch = patches.Rectangle((0, 0), 0, 0, fc='y')
 
-def get_turn_radius(steer_ang):
-	return 1 / m.tan(steer_ang) # this is in radians
+def get_turn_radius(axle_len, steer_ang):
+	return axle_len / m.tan(steer_ang) # this is in radians
 
 def get_theta(parkspace_len, turn_radius):
 	return m.pi + m.asin(parkspace_len/ (2 * turn_radius))
@@ -135,20 +135,29 @@ if __name__ == "__main__": # main function
 	parkspace_len = frontcar.b_up.x - backcar.f_up.x # DEFINE PARKING SPACE LENGTH
 	width_car = frontcar.b_up.y - frontcar.b_down.y
 	len_moveto_fup = 5 # LENGTH OF BACK OF MOVING CAR TO FRONT STATIC CAR
-
+	# --------- DEFINE ALL PRELIMINARY COMPUTATIONS OF THE MOVING CAR ------------
 	bbotm_coordy = frontcar.b_up.y + len_moveto_fup
 	btop_coordy = bbotm_coordy + width_car
 	fbotm_coordy = frontcar.f_up.y + len_moveto_fup
 	ftop_coordy = fbotm_coordy + width_car
-	# --------- DEFINE ALL PRELIMINARY COMPUTATIONS OF THE MOVING CAR ------------
 	movecar = Car(
 		Coordinate(frontcar.f_up.x,ftop_coordy), Coordinate(frontcar.f_up.x,fbotm_coordy), 
 		Coordinate(frontcar.b_up.x,btop_coordy), Coordinate(frontcar.b_up.x,bbotm_coordy)
 	)
 
 	lencar_part = len_car / 5.0
+	# -----------------------------------------------------------------------------
+	# ----------- FIGURE OUT INITIAL COORDINATES OF AXLE MIDPOINTS ----------------
 	backaxle_midpt = Coordinate(frontcar.b_up.x + lencar_part, bbotm_coordy + (width_car / 2))
-
+	frontaxle_midpt = Coordinate(frontcar.f_up.x - lencar_part, fbotm_coordy + (width_car / 2))
+	axle_len = frontaxle_midpt.x - backaxle_midpt.x
+	# -----------------------------------------------------------------------------
+	# -----------------------------------------------------------------------------
+	steer_angle = m.pi / 8.0
+	turn_radius = get_turn_radius(axle_len, steer_angle)
+	c1 = Coordinate(backaxle_midpt.x, backaxle_midpt.y - turn_radius)
+	theta = get_theta(parkspace_len, turn_radius)
+	# -----------------------------------------------------------------------------
 	[fx, fy] = frontcar.genGraphPts()
 	[bx, by] = backcar.genGraphPts()
 	[move_x, move_y] = movecar.genGraphPts()
@@ -159,14 +168,14 @@ if __name__ == "__main__": # main function
 	plt.plot([bx],[by], "go")
 	plt.plot([move_x],[move_y], "ro")
 	plt.plot([backaxle_midpt.x],[backaxle_midpt.y], "bo")
+	plt.plot([frontaxle_midpt.x],[frontaxle_midpt.y], "bo")
+
 
 	plt.show()
-	#turn_radius = get_turn_radius(m.pi/9)
-	#
 
 	'''
-	c1 = Coordinate(movecar_axlept.x, movecar_axlept.y - turn_radius)
-	theta = get_theta(parkspace_len, turn_radius)
+	
+	
 	xm = get_middlept(parkspace_len, turn_radius, c1, theta)
 	xf = Coordinate(0,(backcar_up.y - backcar_down.y + 0.5) /2)
 	c2 = get_c2(turn_radius, xm, xf)
