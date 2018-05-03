@@ -4,69 +4,22 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import matplotlib.patches as patches
 
-class Coordinate:
-    def __init__(self,x,y):
-        self.x = x
-        self.y = y
-
-class Car:
-	def __init__(self, front_up, front_down, back_up, back_down):
-		self.f_up = front_up
-		self.f_down = front_down
-		self.b_up = back_up
-		self.b_down = back_down
-	def genGraphPts(self):
-		return [
-		[self.f_up.x, self.f_down.x, self.b_up.x, self.b_down.x],
-		[self.f_up.y, self.f_down.y, self.b_up.y, self.b_down.y] ]
-
-# What we are given: center point of the back axle of the moving car: movecar_axlept
-# D = length of the parking space: parkspace_len
-# 4 coordinates of the two cars we want to park between: frontcar_up, frontcar_down, backcar_up, backcar_down
-# Steering angle: steer_ang
-
-# X0 = position of movecar_axlept when the back of the cars are aligned
-# X1 = position of movecar_axlept when the back axle and the back of the front car are aligned
-
-# Let's define more variables: movecar_backaxle, movecar_frontaxle (describe positions of front and back axle of moving car)
-# We can therefore define len_axle as the length between the front and back axle of moving car
-# Let's also define the width and length of the actual car, CAR_WIDTH, CAR_LENGTH
+from ppobjs import Car
+from ppobjs import Coordinate
+import utilfuncts as uf
+import drawfuncts as df
 
 fig = plt.figure()
-ax = plt.axes(xlim = (-5,10), ylim = (-10,20))
-
-def get_turn_radius(axle_len, steer_ang):
-	return axle_len / m.tan(steer_ang) # this is in radians
-
-def get_theta(parkspace_len, turn_radius):
-	return m.pi + m.asin(parkspace_len/ (2 * turn_radius))
-
-def get_middlept(parkspace_len, turn_radius, c1, theta): 
-	print "PARK SPACE LEN: ", parkspace_len, "\nTURN RADIUS: ", turn_radius, "\nTHETA: ", 
-	print theta, "\nEND COORDINATE OF C1 (", c1.x, ",", c1.y, ")"
-	xm = Coordinate(c1.x + (turn_radius * m.cos(theta)), c1.y + (turn_radius * m.sin(theta) ))
-	print "END COORDINATE OF XM: (", xm.x, ", ", xm.y, " )"
-	return xm
-
-def plot_graph(movecar_axlept, frontcar_up, frontcar_down, backcar_up, backcar_down, c1):
-	x = [movecar_axlept.x, frontcar_up.x, frontcar_down.x, backcar_up.x, backcar_down.x, c1.x]
-	y = [movecar_axlept.y, frontcar_up.y, frontcar_down.y, backcar_up.y, backcar_down.x, c1.y]
-	plt.plot(x,y, 'ro')
-	plt.autoscale()
-
-def robot_draw_circle(radius, center, theta):
-    time = [x*0.2 for x in range(0, 100)]
-    theta_list = []
-    for t in time:
-        theta_list.append(t * (theta)/12)
-    return theta_list
-
+ax = plt.axes(xlim = (-2,2), ylim = (-2,2))
+ax.set_aspect(1)
+	
 def gen_xy_vals(center, center_flag, theta, turn_radius):
 	theta_list = robot_draw_circle(turn_radius, center, theta)
 	x_vals = []
 	y_vals = []
 	if(center_flag == 1):
 		for i in range(0, len(theta_list)):
+			#and 
 			if(theta_list[i] <= theta and theta_list[i] >= m.pi/2):
 				x_vals.append(center.x + turn_radius * m.cos(theta_list[i]))
 				y_vals.append(center.y + turn_radius * m.sin(theta_list[i]))
@@ -77,45 +30,24 @@ def gen_xy_vals(center, center_flag, theta, turn_radius):
 				y_vals.append(center.y + turn_radius * m.sin(theta_list[i]))
 	return [x_vals, y_vals]    
 
-def get_c2(turn_radius, xm, xf):
-	radsq = turn_radius * turn_radius
-	q_x = m.sqrt(((xf.x - xm.x) * (xf.x - xm.x)) + ((xf.y - xm.y) * (xf.y - xm.y)))
-	q_y = m.sqrt(((xf.x - xm.x) * (xf.x - xm.x)) + ((xf.y - xm.y) * (xf.y - xm.y)))
-	x3 = (xf.x + xm.x) / 2
-	y3 = (xf.y + xm.y) / 2
-	return Coordinate(x3 - m.sqrt(radsq - ((q_x / 2) * (q_x / 2))) * ((xm.y - xf.y) / q_x), 
-		y3 - m.sqrt(radsq - ((q_y / 2) * (q_y / 2))) * ((xf.x-xm.x) / q_y))
-
-def trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals):
-	FINALX_VALS = []
-	FINALY_VALS = []
-	for point in arc1x_vals:
-		FINALX_VALS.append(point)
-	for point in arc1y_vals:
-		FINALY_VALS.append(point)
-	for i in range(len(arc2x_vals) - 1, -1, -1):
-		FINALX_VALS.append(arc2x_vals[i])
-		FINALY_VALS.append(arc2y_vals[i])
-	return [FINALX_VALS, FINALY_VALS]
-
 def init():
 	ax.add_patch(patch)
 	ax.add_patch(patch2)
 	ax.add_patch(patch3)
 	return patch, patch2, patch3 
 
-def animate(i, FINALX_VALS, FINALY_VALS, theta, f_bup, f_bdown, b_bup, b_bdown, steer_angle):
+def animate(i, FINALX_VALS, FINALY_VALS, theta, f_bup, f_bdown, b_bup, b_bdown, steer_ang):
 	patch.set_xy([FINALX_VALS[i], FINALY_VALS[i]])
 	patch2.set_xy([f_bup,f_bdown])
 	patch3.set_xy([b_bup,b_bdown])
-	patch._angle = -np.rad2deg(steer_angle)
+	#patch._angle = -np.rad2deg(car_ang[i])
 	return patch, patch2, patch3
 
 if __name__ == "__main__": # main function
-	len_car = 3.0 # static length of a car
+	len_car = .300 # static length of a car
 	# ----------- LET'S DEFINE THE COORDINATES OF THE FRONT STATIC CAR -----------
 	frontcar = Car(
-		Coordinate(0,0), Coordinate(0,0), Coordinate(6,5), Coordinate(6,.1)
+		Coordinate(0.0,0), Coordinate(0.0,0.0), Coordinate(.75,.50), Coordinate(.75,0.01)
 		)
 
 	frontcar.f_up.x = frontcar.b_up.x + len_car
@@ -125,16 +57,16 @@ if __name__ == "__main__": # main function
 	# ----------------------------------------------------------------------------
 	# ---------- AND NOW THE COORDINATES OF THE BACK STATIC CAR ------------------
 	backcar = Car(
-		Coordinate(0,5), Coordinate(0,.1), Coordinate(0,0), Coordinate(0,0)
+		Coordinate(0.0,0.5), Coordinate(0.0,0.01), Coordinate(0.0,0.0), Coordinate(0.0,0.0)
 		)
 	backcar.b_up.x = backcar.f_up.x - len_car
 	backcar.b_down.x = backcar.f_down.x - len_car
 	backcar.b_up.y = backcar.f_up.y
 	backcar.b_down.y = backcar.f_down.y
 	# ----------------------------------------------------------------------------
-	parkspace_len = frontcar.b_up.x - backcar.f_up.x # DEFINE PARKING SPACE LENGTH
+	parkspace_len =  uf.get_parkspace_len(frontcar, backcar) # DEFINE PARKING SPACE LENGTH
 	width_car = frontcar.b_up.y - frontcar.b_down.y
-	len_moveto_fup = 5 # LENGTH OF BACK OF MOVING CAR TO FRONT STATIC CAR
+	len_moveto_fup = .1 # LENGTH OF BACK OF MOVING CAR TO FRONT STATIC CAR
 	# --------- DEFINE ALL PRELIMINARY COMPUTATIONS OF THE MOVING CAR ------------
 	bbotm_coordy = frontcar.b_up.y + len_moveto_fup
 	btop_coordy = bbotm_coordy + width_car
@@ -148,58 +80,79 @@ if __name__ == "__main__": # main function
 	lencar_part = len_car / 5.0
 	# -----------------------------------------------------------------------------
 	# ----------- FIGURE OUT INITIAL COORDINATES OF AXLE MIDPOINTS ----------------
-	backaxle_midpt = Coordinate(frontcar.b_up.x + lencar_part, bbotm_coordy + (width_car / 2))
-	frontaxle_midpt = Coordinate(frontcar.f_up.x - lencar_part, fbotm_coordy + (width_car / 2))
+	backaxle_midpt = Coordinate(frontcar.b_up.x + lencar_part, bbotm_coordy + (width_car / 2.0))
+	frontaxle_midpt = Coordinate(frontcar.f_up.x - lencar_part, fbotm_coordy + (width_car / 2.0))
 	axle_len = frontaxle_midpt.x - backaxle_midpt.x
-	# -----------------------------------------------------------------------------
-	# -----------------------------------------------------------------------------
-	steer_angle = m.pi / 8.0
-	turn_radius = get_turn_radius(axle_len, steer_angle)
-	c1 = Coordinate(backaxle_midpt.x, backaxle_midpt.y - turn_radius)
-	theta = get_theta(parkspace_len, turn_radius)
-	# -----------------------------------------------------------------------------
-	# -----------------------------------------------------------------------------
-	xm = get_middlept(parkspace_len, turn_radius, c1, theta)
-	e_len = 0.8 # use this to get the closest we can get to the back car
-	xf = Coordinate(backcar.f_up.x + e_len, (backcar.f_up.y - backcar.f_down.y) /2)
-	c2 = get_c2(turn_radius, xm, xf)
-	# -----------------------------------------------------------------------------
-	# -----------------------------------------------------------------------------
-	[arc1x_vals, arc1y_vals] = gen_xy_vals(c1, 1, theta, turn_radius)
-	[arc2x_vals, arc2y_vals] = gen_xy_vals(c2, 2, theta, turn_radius)
-	[FINALX_VALS, FINALY_VALS] = trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals)
 
-	'''
-	theta_list = robot_draw_circle(turn_radius, c2, theta)
-	lolx = []
-	loly = []
-	for i in range(len(theta_list) - 1, -1, -1):
+	dist_backofcar_tobackaxle = lencar_part
+	# -----------------------------------------------------------------------------
 
-		lolx.append(c2.x + turn_radius * m.cos(theta_list[i]))
-		loly.append(c2.y + turn_radius * m.sin(theta_list[i]))
-	plt.plot([lolx],[loly], "c8")
-	plt.plot([lolx[10]],[loly[10]], "ro")
-	'''
+	# -------------------------SKETCH OUT ORIGINAL PLAN----------------------------
+	steer_ang = m.pi / 12.0 # start off with static steer angle
+
+	turn_radius = uf.get_turn_radius(axle_len, steer_ang) # figure out initial turn radius
+
+	err_len = 0.001 # use this to get the closest we can get to the back car
+
+	xf = uf.gen_xf(backcar, err_len, dist_backofcar_tobackaxle, width_car, axle_len) # figure out final position of midbackaxle
+
+	c1 = uf.gen_c1(frontcar, frontaxle_midpt, turn_radius) # generate center of circle 1
+
+	delta_x = uf.gen_delta_x(xf.x, parkspace_len, err_len, dist_backofcar_tobackaxle, axle_len)
+
+	delta_y = uf.gen_delta_y(backaxle_midpt, xf)
+
+	theta = uf.get_theta(delta_x, turn_radius)
+
+	c2 = uf.gen_c2(backcar, err_len, dist_backofcar_tobackaxle, xf, turn_radius, axle_len)
+	
+	xm = uf.get_middlept(c1, c2)
+
+	print uf.check_arcs_toobig(delta_y, turn_radius)
+	# -----------------------------------------------------------------------------
+	[c1x, c1y] = df.sketch_circle(c1, turn_radius)
+	plt.plot([c1x],[c1y], "bo")
+	[c2x, c2y] = df.sketch_circle(c2, turn_radius)
+	plt.plot([c2x],[c2y], "ro")
+	plt.plot([c1.x],[c1.y],"b+")
+	plt.plot([c2.x],[c2.y], "r+")
+
+	#plt.plot([c1.x + turn_radius * (m.cos(theta))],[c1.y + turn_radius * (m.sin(theta))], "g+")
+	#plt.plot([c1.x + turn_radius * m.cos(theta)],[c1.y + turn_radius * m.sin(-theta)], "r+")
+	plt.plot([xm.x],[xm.y], "g^")
+	plt.plot([xf.x],[xf.y], "g^")
+
+	[arc1x_vals, arc1y_vals] = df.generate_arc(c1.x, c1.y, theta, turn_radius, 1)
+	[arc2x_vals, arc2y_vals] = df.generate_arc(c2.x, c2.y, theta, turn_radius, 2)
+	#plt.plot([arc1x_vals], [arc1y_vals], "m+")
+	#plt.plot([arc2x_vals], [arc2y_vals], "m+")
+	[FINALX_VALS, FINALY_VALS] = df.trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals)
 	plt.plot([FINALX_VALS],[FINALY_VALS], "m+")
 	total_len = len(arc1x_vals) + len(arc2x_vals)
 	# -----------------------------------------------------------------------------
+	# -----------------------------------------------------------------------------
+	# -----------------------------------------------------------------------------
+	
+	# -----------------------------------------------------------------------------
 	print "LEN(ARC1X_VALS)", len(arc1x_vals), "\nLEN(ARC2X_VALS):", len(arc2x_vals)
+	'''
 	# -----------------------------------------------------------------------------
 	test_coord = Coordinate(movecar.b_down.x, movecar.b_down.y)
 	plt.plot([test_coord.x],[test_coord.y], "b^")
 	# -----------------------------------------------------------------------------
+	'''
+
 	[fx, fy] = frontcar.genGraphPts()
 	[bx, by] = backcar.genGraphPts()
 	[move_x, move_y] = movecar.genGraphPts()
 
 	print move_x, "\t", move_y
 	print backaxle_midpt.x, ", ", backaxle_midpt.y
-	plt.plot([fx],[fy], "mo")
-	plt.plot([bx],[by], "go")
-	plt.plot([move_x],[move_y], "ro")
-	plt.plot([backaxle_midpt.x],[backaxle_midpt.y], "bo")
-	plt.plot([frontaxle_midpt.x],[frontaxle_midpt.y], "bo")
-	plt.plot([c1.x,xm.x,c2.x,xf.x],[c1.y,xm.y,c2.y,xf.y],"mp")
+	plt.plot([fx],[fy], "rp")
+	plt.plot([bx],[by], "rp")
+	plt.plot([move_x],[move_y], "rp")
+
+	car_ang = uf.gen_angles(movecar)
 
 	patch = patches.Rectangle((0, 0), len_car, width_car, fc='indianred')
 	patch2 = patches.Rectangle((frontcar.b_down.x, frontcar.b_down.y), len_car, width_car, fc='rebeccapurple')
@@ -213,9 +166,9 @@ if __name__ == "__main__": # main function
 		frontcar.b_down.y,
 		backcar.b_down.x,
 		backcar.b_down.y,
-		steer_angle
-		), interval=100, blit=True)
-	plt.autoscale()
+		steer_ang
+		), interval=150, blit=True)
+	
 	plt.show()
 
 
