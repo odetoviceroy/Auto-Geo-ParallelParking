@@ -31,7 +31,7 @@ def animate(i, FINALX_VALS, FINALY_VALS, theta, f_bup, f_bdown, b_bup, b_bdown, 
 if __name__ == "__main__": # main function
 	# ----------- LET'S DEFINE THE COORDINATES OF THE FRONT STATIC CAR -----------
 	frontcar = Car(
-		Coordinate(0.0,0), Coordinate(0.0,0.0), Coordinate(1.0,0.5), Coordinate(1.0,0.1)
+		Coordinate(0.0,0), Coordinate(0.0,0.0), Coordinate(1.0,0.4), Coordinate(1.0,0.1)
 		)
 
 	frontcar.set_fup(frontcar.b_up.x + frontcar.len_car, frontcar.b_up.y)
@@ -79,11 +79,15 @@ if __name__ == "__main__": # main function
 
 	delta_y = uf.gen_delta_y(movecar.backaxle_midpt, xf)
 
-	theta = uf.get_theta(delta_x, turn_radius)
+	#theta = uf.get_theta(delta_x, turn_radius)
 
-	c2 = uf.gen_c2(backcar, err_len, dist_backofcar_tobackaxle, xf, turn_radius, axle_len)
+	theta = uf.get_theta_fromarcheight(turn_radius, delta_y)
 	
-	xm = uf.get_middlept(c1, c2, turn_radius, theta)
+	xm = uf.get_middlept(c1, turn_radius, theta)
+
+	c2 = uf.gen_c2(xm, turn_radius, theta)
+
+	xf = uf.fit_xf(c2, turn_radius, theta)
 
 	arc_height = uf.calc_archeight(turn_radius, theta)
 	print uf.check_archeight_biggerthanhalfy(arc_height, delta_y)
@@ -96,15 +100,15 @@ if __name__ == "__main__": # main function
 	plt.plot([c1.x],[c1.y],"b+")
 	plt.plot([c2.x],[c2.y], "r+")
 
-	#plt.plot([c1.x + turn_radius * (m.cos(theta))],[c1.y + turn_radius * (m.sin(theta))], "g+")
-	#plt.plot([c1.x + turn_radius * m.cos(theta)],[c1.y + turn_radius * m.sin(-theta)], "r+")
+	plt.plot([c1.x + turn_radius * (m.cos(theta))],[c1.y + turn_radius * (m.sin(theta))], "g+")
+	plt.plot([c1.x + turn_radius * m.cos(theta)],[c1.y + turn_radius * m.sin(-theta)], "r+")
 	plt.plot([xm.x],[xm.y], "g^")
 	plt.plot([xf.x],[xf.y], "g^")
 
 	[arc1x_vals, arc1y_vals] = df.generate_arc(c1.x, c1.y, theta, turn_radius, 1, dist_bottomcar_to_axlemidpt)
 	[arc2x_vals, arc2y_vals] = df.generate_arc(c2.x, c2.y, theta, turn_radius, 2, dist_bottomcar_to_axlemidpt)
-	#plt.plot([arc1x_vals], [arc1y_vals], "m+")
-	#plt.plot([arc2x_vals], [arc2y_vals], "m+")
+	plt.plot([arc1x_vals], [arc1y_vals], "m+")
+	plt.plot([arc2x_vals], [arc2y_vals], "m+")
 	[FINALX_VALS, FINALY_VALS] = df.trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals)
 	#plt.plot([FINALX_VALS],[FINALY_VALS], "m+")
 	total_len = len(arc1x_vals) + len(arc2x_vals)
@@ -134,13 +138,13 @@ if __name__ == "__main__": # main function
 	car_angs = uf.gen_angles(FINALX_VALS, FINALY_VALS)
 	print car_angs
 
-	'''
-	patch = patches.Rectangle((0, 0), len_car, width_car, fc='indianred')	
+	
+	patch = patches.Rectangle((0, 0), movecar.len_car, movecar.width_car, fc='indianred')	
 
-	patch2 = patches.Rectangle((frontcar.b_down.x, frontcar.b_down.y), len_car, width_car, fc='rebeccapurple')
-	patch3 = patches.Rectangle((backcar.b_down.x, backcar.b_down.y), len_car, width_car, fc = 'limegreen')
-	'''
-	'''
+	patch2 = patches.Rectangle((frontcar.b_down.x, frontcar.b_down.y), movecar.len_car, movecar.width_car, fc='rebeccapurple')
+	patch3 = patches.Rectangle((backcar.b_down.x, backcar.b_down.y), movecar.len_car, movecar.width_car, fc = 'limegreen')
+	
+	
 	ani = animation.FuncAnimation(fig, animate, init_func=init, frames= total_len, fargs = (
 		FINALX_VALS,
 		FINALY_VALS,
@@ -151,8 +155,6 @@ if __name__ == "__main__": # main function
 		backcar.b_down.y,
 		car_angs
 		), interval=200, blit=True)
-	'''
+
 	plt.show()
 
-
-	
