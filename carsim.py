@@ -9,10 +9,12 @@ from ppobjs import Coordinate
 import utilfuncts as uf
 import drawfuncts as df
 
+'''
 fig = plt.figure()
 ax = plt.axes(xlim = (-2.0,2.5), ylim = (-2.0,2.0))
 ax.set_aspect(1)
-
+'''
+'''
 def init():
 	ax.add_patch(patch)
 	ax.add_patch(patch2)
@@ -27,6 +29,31 @@ def animate(i, FINALX_VALS, FINALY_VALS, theta, f_bup, f_bdown, b_bup, b_bdown, 
 	#patch._angle(deg)
 	#print deg
 	return patch, patch2, patch3
+
+'''
+
+fig, ax = plt.subplots()
+xfixdata, yfixdata = 14, 8
+xdata, ydata = 5, None
+ln, = plt.plot([], [], 'ro-', animated=True)
+#plt.plot([xfixdata], [yfixdata], 'bo', ms=10)
+
+def init():
+	ax.set_xlim(-1, 3)
+	ax.set_ylim(-1, 3)
+	return ln,
+
+def update(frame, movecar, FINALX_VALS, FINALY_VALS, car_angs):
+	ln.set_data([FINALX_VALS[frame]],[FINALY_VALS[frame]])
+	movecar.setOrientation(car_angs[frame])
+	[move_x, move_y] = movecar.genGraphPts()
+	plt.plot([move_x],[move_y], "rp")
+	return ln,
+	'''
+    ydata = list_var_points[frame]
+    ln.set_data([xfixdata,xdata], [yfixdata,ydata])
+    '''
+
 
 if __name__ == "__main__": # main function
 	# ----------- LET'S DEFINE THE COORDINATES OF THE FRONT STATIC CAR -----------
@@ -60,7 +87,7 @@ if __name__ == "__main__": # main function
 	)
 	# -----------------------------------------------------------------------------
 	# ----------- FIGURE OUT INITIAL COORDINATES OF AXLE MIDPOINTS ----------------
-	axle_len = movecar.frontaxle_midpt.x - movecar.backaxle_midpt.x
+	axle_len = uf.dist_twopoints(movecar.frontaxle_midpt,movecar.backaxle_midpt)
 	dist_backofcar_tobackaxle = lencar_part
 	dist_bottomcar_to_axlemidpt = movecar.backaxle_midpt.y - movecar.b_down.y
 	# -----------------------------------------------------------------------------b
@@ -129,8 +156,9 @@ if __name__ == "__main__": # main function
 	[bx, by] = backcar.genGraphPts()
 	[move_x, move_y] = movecar.genGraphPts()
 
-	print move_x, "\t", move_y
-	print movecar.backaxle_midpt.x, ", ", movecar.backaxle_midpt.y
+
+	print "FRONT CAR:", move_x, "\t", "BACK CAR:", move_y
+	print "INITIAL BACKAXLE MIDPT:(", movecar.backaxle_midpt.x, ", ", movecar.backaxle_midpt.y, ")"
 	plt.plot([fx],[fy], "rp")
 	plt.plot([bx],[by], "rp")
 	plt.plot([move_x],[move_y], "rp")
@@ -138,13 +166,11 @@ if __name__ == "__main__": # main function
 	car_angs = uf.gen_angles(FINALX_VALS, FINALY_VALS)
 	print car_angs
 
-	
-	patch = patches.Rectangle((0, 0), movecar.len_car, movecar.width_car, fc='indianred')	
 
+	'''
+	patch = patches.Rectangle((0, 0), movecar.len_car, movecar.width_car, fc='indianred')	
 	patch2 = patches.Rectangle((frontcar.b_down.x, frontcar.b_down.y), movecar.len_car, movecar.width_car, fc='rebeccapurple')
 	patch3 = patches.Rectangle((backcar.b_down.x, backcar.b_down.y), movecar.len_car, movecar.width_car, fc = 'limegreen')
-	
-	
 	ani = animation.FuncAnimation(fig, animate, init_func=init, frames= total_len, fargs = (
 		FINALX_VALS,
 		FINALY_VALS,
@@ -155,6 +181,14 @@ if __name__ == "__main__": # main function
 		backcar.b_down.y,
 		car_angs
 		), interval=200, blit=True)
+	'''
+	ani = animation.FuncAnimation(fig, update, init_func=init, frames= total_len, fargs = (
+		movecar,
+		FINALX_VALS,
+		FINALY_VALS,
+		car_angs,
+		),
+		blit=True)
 
 	plt.show()
 
