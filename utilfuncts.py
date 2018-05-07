@@ -2,6 +2,13 @@ import math as m
 from ppobjs import Car
 from ppobjs import Coordinate
 
+def dist_twopoints(p1,p2):
+	res = (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y)
+	res = m.sqrt(res)
+	print "DISTANCE BETWEEN TWO GIVEN POINTS: ", res
+	return res
+
+
 def get_parkspace_len(frontcar, backcar):
 	res = frontcar.b_up.x - backcar.f_up.x
 	print "PARKSPACE LEN:", res
@@ -70,9 +77,13 @@ def gen_angles(FINALX_VALS, FINALY_VALS):
 	car_angs = []
 	car_angs.append(0.0)
 	for i in range(0, len(FINALX_VALS) - 1):
-		rise = m.fabs(FINALY_VALS[i] + FINALY_VALS[i+1])
-		run = m.fabs(FINALX_VALS[i] + FINALX_VALS[i+1])
-		car_angs.append(m.atan(rise / run))
+		rise = m.fabs(FINALY_VALS[i+1] - FINALY_VALS[i])
+		run = m.fabs(FINALX_VALS[i+1] - FINALX_VALS[i])
+		if run == 0:
+			car_angs.append(car_angs[i-1])
+		else:
+			car_angs.append(m.atan(rise / run))
+	print "CAR ANGS LENGTH: ", len(car_angs)
 	return car_angs
 
 def get_theta_fromarcheight(turn_radius, delta_y):
@@ -85,7 +96,7 @@ def get_theta_fromarcheight(turn_radius, delta_y):
 	return res
 
 def fit_xf(c2, turn_radius, theta):
-	resx = c2.x + turn_radius * m.cos(-1 * (m.pi - (theta + m.pi/2)) - theta)
-	resy = c2.y + turn_radius * m.sin(-1 * (m.pi - (theta + m.pi/2)) - theta)
+	resx = c2.x + turn_radius * m.cos(-1 * (m.pi - (theta + m.pi/2)) - theta + m.pi/7)
+	resy = c2.y + turn_radius * m.sin(-1 * (m.pi - (theta + m.pi/2)) - theta + m.pi/7)
 	print "FITTED XF COORDINATE:(", resx, ",", resy, ")"
 	return Coordinate(resx,resy)
