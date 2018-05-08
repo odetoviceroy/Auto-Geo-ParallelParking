@@ -96,7 +96,17 @@ def get_theta_fromarcheight(turn_radius, delta_y):
 	return res
 
 def fit_xf(c2, turn_radius, theta):
-	resx = c2.x + turn_radius * m.cos(-1 * (m.pi - (theta + m.pi/2)) - theta + m.pi/7)
-	resy = c2.y + turn_radius * m.sin(-1 * (m.pi - (theta + m.pi/2)) - theta + m.pi/7)
+	resx = c2.x + turn_radius * m.cos(-1 * (m.pi - (theta + m.pi/2)) - theta + m.pi/15)
+	resy = c2.y + turn_radius * m.sin(-1 * (m.pi - (theta + m.pi/2)) - theta + m.pi/15)
 	print "FITTED XF COORDINATE:(", resx, ",", resy, ")"
 	return Coordinate(resx,resy)
+
+def drive_car_forwards(movecar, err_len):
+	x_vals = []
+	y_vals = []
+	for i in range(0, 20):
+		movecar.setFrontAxle(movecar.frontaxle_midpt.x + (err_len / 20.0), movecar.frontaxle_midpt.y)
+		x_vals.append(movecar.frontaxle_midpt.x)
+		y_vals.append(movecar.frontaxle_midpt.y)
+	return [x_vals, y_vals]
+
