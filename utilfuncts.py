@@ -24,13 +24,13 @@ def gen_xf(backcar, err_len, dist_backofcar_tobackaxle, axle_len):
 	print "XF Coordinate (", resx, ",", resy, ")"
 	return Coordinate(resx,resy)
 
-def gen_delta_x(backaxle_midpt, xf):
-	res = backaxle_midpt.x - xf.x
+def gen_delta_x(frontaxle_midpt, xf):
+	res = frontaxle_midpt.x - xf.x
 	print "DELTA X:", res
 	return res
 
-def gen_delta_y(backaxle_midpt, xf):
-	res = backaxle_midpt.y - xf.y
+def gen_delta_y(frontaxle_midpt, xf):
+	res = frontaxle_midpt.y - xf.y
 	print "DELTA Y:", res
 	return res
 
@@ -43,10 +43,6 @@ def gen_c1(frontcar, frontaxle_midpt, turn_radius):
 def gen_c2(xm, turn_radius, theta):
 	resx = xm.x + turn_radius * m.cos(m.pi/2 + theta)
 	resy = xm.y + turn_radius * m.sin(m.pi/2 + theta)
-	'''
-	resx = xf.x
-	resy = xf.y + turn_radius
-	'''
 	print "C2 Coordinate (", resx, ",", resy, ")"
 	return Coordinate(resx, resy)
 
@@ -87,7 +83,7 @@ def gen_angles(FINALX_VALS, FINALY_VALS):
 
 def get_theta_fromarcheight(turn_radius, delta_y):
 	# The paper states that the height of both arcs must be fitted to 1/2 * delta_y each
-	# So we can therefore use this to figure out theta for drawing these arcs and therefore getting xm
+	# So we can therefore use this to figure out theta for drawing these arcs thus getting xm
 	res = 1 - ((delta_y / 2.0) / turn_radius) 
 	print "RES: ", res
 	res = m.acos(res) 
@@ -95,8 +91,8 @@ def get_theta_fromarcheight(turn_radius, delta_y):
 	return res
 
 def fit_xf(c2, turn_radius, theta, steer_ang):
-	resx = c2.x + turn_radius * m.cos(-1 * (m.pi - (theta + m.pi/2)) - theta + (steer_ang/1.5))
-	resy = c2.y + turn_radius * m.sin(-1 * (m.pi - (theta + m.pi/2)) - theta + (steer_ang/1.5))
+	resx = c2.x + turn_radius * m.cos(-1 * (m.pi - (theta + m.pi/2)) - theta + steer_ang / 1.5)
+	resy = c2.y + turn_radius * m.sin(-1 * (m.pi - (theta + m.pi/2)) - theta + steer_ang / 1.5)
 	print "FITTED XF COORDINATE:(", resx, ",", resy, ")"
 	return Coordinate(resx,resy)
 
