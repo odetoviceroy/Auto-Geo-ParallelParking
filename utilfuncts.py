@@ -8,7 +8,6 @@ def dist_twopoints(p1,p2):
 	print "DISTANCE BETWEEN TWO GIVEN POINTS: ", res
 	return res
 
-
 def get_parkspace_len(frontcar, backcar):
 	res = frontcar.b_up.x - backcar.f_up.x
 	print "PARKSPACE LEN:", res
@@ -21,7 +20,7 @@ def get_turn_radius(axle_len, steer_ang):
 
 def gen_xf(backcar, err_len, dist_backofcar_tobackaxle, axle_len):
 	resx = backcar.f_up.x + err_len + dist_backofcar_tobackaxle + axle_len
-	resy = err_len + (backcar.width_car / 2.0)
+	resy = err_len + (backcar.width_car / 10.0)
 	print "XF Coordinate (", resx, ",", resy, ")"
 	return Coordinate(resx,resy)
 
