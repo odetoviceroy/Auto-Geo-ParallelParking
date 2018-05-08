@@ -20,10 +20,6 @@ patch = patches.Rectangle((0, 0), 5, 5, fc='indianred', alpha = .5)
 #plt.plot([xfixdata], [yfixdata], 'bo', ms=10)
 
 def init():
-	'''
-	ax.set_xlim(-1, 3)
-	ax.set_ylim(-1, 3)
-	'''
 	ax.set_aspect(1)
 	ax.add_patch(patch)
 	ax.add_patch(patch2)
@@ -46,9 +42,11 @@ def update(i, movecar, FINALX_VALS, FINALY_VALS, car_angs, dist_bottomcar_to_axl
 		second_joint.y + dist_backofcar_tofrontaxle * m.sin(phi2)
 
 		)
+
 	patch.set_width(movecar.len_car)
 	patch.set_height(movecar.width_car)
-
+	end_effector = uf.gen_end_effector(lamb_da, car_angs[i], FINALX_VALS[i], FINALY_VALS[i], 
+		dist_bottomcar_to_axlemidpt, dist_backofcar_tofrontaxle)
 	'''
 	ts = ax.transData
 	coords = ts.transform([end_effector.x, end_effector.y])
@@ -72,7 +70,6 @@ def update(i, movecar, FINALX_VALS, FINALY_VALS, car_angs, dist_bottomcar_to_axl
 	print "SECOND_JOINT X:",  second_joint.x, "\tSECOND_JOINT Y:", second_joint.y
 	print "END EFFECTOR X:",  end_effector.x, "\tENDEFFECTOR Y:", end_effector.y, "\n-----------"
 	return patch, patch2, patch3
-
 
 
 if __name__ == "__main__": # main function
@@ -121,6 +118,8 @@ if __name__ == "__main__": # main function
 
 	xf = uf.gen_xf(backcar, err_len, dist_backofcar_tobackaxle, axle_len) # figure out final position of midbackaxle
 
+	xf_backup = Coordinate(xf.x, xf.y)
+
 	plt.plot([xf.x],[xf.y], "gp")
 
 	c1 = uf.gen_c1(frontcar, movecar.frontaxle_midpt, turn_radius) # generate center of circle 1
@@ -144,9 +143,9 @@ if __name__ == "__main__": # main function
 	print uf.check_arcs_toobig(delta_y, turn_radius)
 	# -----------------------------------------------------------------------------
 	[c1x, c1y] = df.sketch_circle(c1, turn_radius)
-	plt.plot([c1x],[c1y], "bo")
+	plt.plot([c1x],[c1y], "b.")
 	[c2x, c2y] = df.sketch_circle(c2, turn_radius)
-	plt.plot([c2x],[c2y], "ro")
+	plt.plot([c2x],[c2y], "r.")
 	plt.plot([c1.x],[c1.y],"b+")
 	plt.plot([c2.x],[c2.y], "r+")
 
@@ -161,9 +160,9 @@ if __name__ == "__main__": # main function
 	movecar.setFrontAxle(arc2x_vals[0], arc2y_vals[0])
 	[m_forwardx, m_forwardy] = uf.drive_car_forwards(movecar, err_len)
 	print "HAAAA:", m_forwardx
-	plt.plot([arc1x_vals], [arc1y_vals], "m+")
-	plt.plot([arc2x_vals], [arc2y_vals], "m+")
-	plt.plot([m_forwardx], [m_forwardy], "m+")
+	#plt.plot([arc1x_vals], [arc1y_vals], "m+")
+	#plt.plot([arc2x_vals], [arc2y_vals], "m+")
+	#plt.plot([m_forwardx], [m_forwardy], "m+")
 	[FINALX_VALS, FINALY_VALS] = df.trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals, m_forwardx, m_forwardy)
 	#plt.plot([FINALX_VALS],[FINALY_VALS], "m+")
 	total_len = len(arc1x_vals) + len(arc2x_vals) + len(m_forwardx)
@@ -179,7 +178,7 @@ if __name__ == "__main__": # main function
 	plt.plot([test_coord.x],[test_coord.y], "b^")
 	# -----------------------------------------------------------------------------
 	'''
-
+	df.label_points(ax,c1,c2, xm, xf, xf_backup, Coordinate(FINALX_VALS[0], FINALY_VALS[0]))
 	'''
 	[fx, fy] = frontcar.genGraphPts()
 	[bx, by] = backcar.genGraphPts()
@@ -195,10 +194,19 @@ if __name__ == "__main__": # main function
 	car_angs = uf.gen_angles(FINALX_VALS, FINALY_VALS)
 	print "CAR_ANGS(RAD):",car_angs
 	patch2 = patches.Rectangle((frontcar.b_down.x, frontcar.b_down.y), movecar.len_car, movecar.width_car, 
-		fc='rebeccapurple', alpha = .5)
+		fc='rebeccapurple', alpha = .45)
 	patch3 = patches.Rectangle((backcar.b_down.x, backcar.b_down.y), movecar.len_car, movecar.width_car, 
-		fc = 'limegreen', alpha = .5)
+		fc = 'limegreen', alpha = .45)
 
+
+	df.gen_skeletongraph(ax, frontcar, backcar, movecar,
+		FINALX_VALS,
+		FINALY_VALS,
+		car_angs,
+		dist_bottomcar_to_axlemidpt,
+		dist_backofcar_tofrontaxle,)
+	
+	'''
 	ani = animation.FuncAnimation(fig, update, init_func=init, frames= total_len, fargs = (
 		movecar,
 		FINALX_VALS,
@@ -207,8 +215,16 @@ if __name__ == "__main__": # main function
 		dist_bottomcar_to_axlemidpt,
 		dist_backofcar_tofrontaxle,
 		),
-		interval = 100,
+		interval = 500,
 		blit=True)
-
+	'''
+	label_str = "Parallel Parking Map (steer_ang ="
+	label_str = label_str + str(steer_ang) + ", d[c] = " + str(len_moveto_fup) + ")"
+	plt.title(label_str)
+	plt.ylabel("Y")
+	plt.xlabel("X")
 	plt.show()
+	'''
+	plt.show()
+	'''
 
