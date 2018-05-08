@@ -27,7 +27,7 @@ def generate_arc(cx, cy, theta, r, cflag, axle_len, steer_ang):
 		#r = r - (axle_len)
 	else:
 		theta = np.linspace(
-			2 * np.pi - (np.pi - (theta + np.pi/2)) - theta + steer_ang / 1.5, 
+			2 * np.pi - (np.pi - (theta + np.pi/2)) - theta + (steer_ang / 1.5), 
 			2 * np.pi - (np.pi - (theta + np.pi/2)), 
 			25
 			)
@@ -60,11 +60,11 @@ def sketch_circle(c, turn_radius):
 
 def label_points(ax,c1,c2,xm,xf, xf_backup, x0):
 	txt = ax.annotate('C1',xy=(c1.x,c1.y),fontsize=10,\
-	xytext=(c1.x - .2,c1.y - .2),arrowprops=dict(arrowstyle="->",connectionstyle="arc3,rad=-.2"))
+	xytext=(c1.x + .2,c1.y - .2),arrowprops=dict(arrowstyle="->",connectionstyle="arc3,rad=-.2"))
 	txt = ax.annotate('C2',xy=(c2.x,c2.y),fontsize=10,\
 	xytext=(c2.x - .2,c2.y - .2),arrowprops=dict(arrowstyle="->",connectionstyle="arc3,rad=-.2"))
 	txt = ax.annotate('XM',xy=(xm.x,xm.y),fontsize=10,\
-	xytext=(xm.x + .3,xm.y + .2),arrowprops=dict(arrowstyle="->",connectionstyle="arc3,rad=-.2"))
+	xytext=(xm.x + .3,xm.y + .4),arrowprops=dict(arrowstyle="->",connectionstyle="arc3,rad=-.2"))
 	txt = ax.annotate('FITTED XF',xy=(xf.x,xf.y),fontsize=10,\
 	xytext=(xf.x - .4,xf.y - .4),arrowprops=dict(arrowstyle="->",connectionstyle="arc3,rad=-.2"))
 	txt = ax.annotate('ORIGINAL XF',xy=(xf_backup.x,xf_backup.y),fontsize=10,\
