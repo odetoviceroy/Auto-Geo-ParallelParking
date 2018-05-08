@@ -21,16 +21,27 @@ def gen_circle(c, r):
 	ax.set_aspect(1)
 	plt.show()
 	'''
-def generate_arc(cx, cy, theta, r, cflag):
+def generate_arc(cx, cy, theta, r, cflag, axle_len):
 	if(cflag == 1):
-		theta = np.linspace(np.pi / 2, (np.pi/2) + theta, 50)
+		theta = np.linspace(
+			np.pi / 2, 
+			(np.pi/2) + theta, 
+			25
+			)
+		#r = r - (axle_len)
 	else:
-		theta = np.linspace((2 * np.pi) - theta, ((2 * np.pi) - theta) + np.pi/6, 50)
-	x1 = cx + r*np.cos(theta)
-	y1 = cy + r*np.sin(theta)
+		theta = np.linspace(
+			2 * np.pi - (np.pi - (theta + np.pi/2)) - theta + np.pi/15, 
+			2 * np.pi - (np.pi - (theta + np.pi/2)), 
+			25
+			)
+		#r = r + (axle_len)
+
+	x1 = cx + (r *np.cos(theta))
+	y1 = cy + (r *np.sin(theta))
 	return [x1,y1]
 
-def trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals):
+def trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals, m_forwardx, m_forwardy):
 	FINALX_VALS = []
 	FINALY_VALS = []
 	for point in arc1x_vals:
@@ -40,6 +51,10 @@ def trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals):
 	for i in range(len(arc2x_vals) - 1, -1, -1):
 		FINALX_VALS.append(arc2x_vals[i])
 		FINALY_VALS.append(arc2y_vals[i])
+	for p in m_forwardx:
+		FINALX_VALS.append(p)
+	for p in m_forwardy:
+		FINALY_VALS.append(p)
 	return [FINALX_VALS, FINALY_VALS]
 
 
