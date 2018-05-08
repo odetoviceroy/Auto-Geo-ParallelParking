@@ -20,10 +20,10 @@ patch = patches.Rectangle((0, 0), 5, 5, fc='indianred', alpha = .5)
 #plt.plot([xfixdata], [yfixdata], 'bo', ms=10)
 
 def init():
-	ax.set_aspect(1)
 	ax.add_patch(patch)
 	ax.add_patch(patch2)
 	ax.add_patch(patch3)
+
 	return patch, patch2, patch3, 
 
 def update(i, movecar, FINALX_VALS, FINALY_VALS, car_angs, dist_bottomcar_to_axlemidpt, dist_backofcar_tofrontaxle):
@@ -47,19 +47,7 @@ def update(i, movecar, FINALX_VALS, FINALY_VALS, car_angs, dist_bottomcar_to_axl
 	patch.set_height(movecar.width_car)
 	end_effector = uf.gen_end_effector(lamb_da, car_angs[i], FINALX_VALS[i], FINALY_VALS[i], 
 		dist_bottomcar_to_axlemidpt, dist_backofcar_tofrontaxle)
-	'''
-	ts = ax.transData
-	coords = ts.transform([end_effector.x, end_effector.y])
-	tr = mpl.transforms.Affine2D().rotate_deg_around(coords[0], coords[1], np.rad2deg(lamb_da))
-	t = ts + tr
-	print t
-	patch.set_width(movecar.len_car)
-	patch.set_height(movecar.width_car)
-
-	patch.set_transform(t)
-
-	print coords
-	'''
+	
 
 	t2 = mpl.transforms.Affine2D().rotate_deg_around(end_effector.x, end_effector.y, np.rad2deg(lamb_da)) + ax.transData
 	patch.set_transform(t2)
@@ -91,7 +79,7 @@ if __name__ == "__main__": # main function
 	# ----------------------------------------------------------------------------
 	# ------------- DEFINE PRELIMINARY CONSTRAINTS TO LOCATE MOVING CAR ----------
 	parkspace_len =  uf.get_parkspace_len(frontcar, backcar) # DEFINE PARKING SPACE LENGTH
-	len_moveto_fup = .2 # LENGTH OF BACK OF MOVING CAR TO FRONT STATIC CAR
+	len_moveto_fup = .22 # LENGTH OF BACK OF MOVING CAR TO FRONT STATIC CAR
 	# ----------------------------------------------------------------------------
 	# --------- DEFINE ALL PRELIMINARY COMPUTATIONS OF THE MOVING CAR ------------
 	bbotm_coordy = frontcar.b_up.y + len_moveto_fup
@@ -114,7 +102,7 @@ if __name__ == "__main__": # main function
 
 	turn_radius = uf.get_turn_radius(axle_len, steer_ang) # figure out initial turn radius
 
-	err_len = 0.25 # use this to get the closest we can get to the back car
+	err_len = 0.2 # use this to get the closest we can get to the back car
 
 	xf = uf.gen_xf(backcar, err_len, dist_backofcar_tobackaxle, axle_len) # figure out final position of midbackaxle
 
@@ -136,7 +124,7 @@ if __name__ == "__main__": # main function
 
 	c2 = uf.gen_c2(xm, turn_radius, theta)
 
-	xf = uf.fit_xf(c2, turn_radius, theta)
+	xf = uf.fit_xf(c2, turn_radius, theta, steer_ang)
 
 	arc_height = uf.calc_archeight(turn_radius, theta)
 	print uf.check_archeight_biggerthanhalfy(arc_height, delta_y)
@@ -154,12 +142,13 @@ if __name__ == "__main__": # main function
 	plt.plot([xm.x],[xm.y], "g^")
 	plt.plot([xf.x],[xf.y], "g^")
 
-	[arc1x_vals, arc1y_vals] = df.generate_arc(c1.x, c1.y, theta, turn_radius, 1, dist_bottomcar_to_axlemidpt)
-	[arc2x_vals, arc2y_vals] = df.generate_arc(c2.x, c2.y, theta, turn_radius, 2, dist_bottomcar_to_axlemidpt)
+	[arc1x_vals, arc1y_vals] = df.generate_arc(c1.x, c1.y, theta, turn_radius, 1, dist_bottomcar_to_axlemidpt, steer_ang)
+	[arc2x_vals, arc2y_vals] = df.generate_arc(c2.x, c2.y, theta, turn_radius, 2, dist_bottomcar_to_axlemidpt, steer_ang)
 
 	movecar.setFrontAxle(arc2x_vals[0], arc2y_vals[0])
-	[m_forwardx, m_forwardy] = uf.drive_car_forwards(movecar, err_len)
-	print "HAAAA:", m_forwardx
+	free_zone = frontcar.b_up.x - arc2x_vals[0] - err_len
+	[m_forwardx, m_forwardy] = uf.drive_car_forwards(movecar, free_zone)
+	
 	#plt.plot([arc1x_vals], [arc1y_vals], "m+")
 	#plt.plot([arc2x_vals], [arc2y_vals], "m+")
 	#plt.plot([m_forwardx], [m_forwardy], "m+")
@@ -198,7 +187,7 @@ if __name__ == "__main__": # main function
 	patch3 = patches.Rectangle((backcar.b_down.x, backcar.b_down.y), movecar.len_car, movecar.width_car, 
 		fc = 'limegreen', alpha = .45)
 
-
+	
 	df.gen_skeletongraph(ax, frontcar, backcar, movecar,
 		FINALX_VALS,
 		FINALY_VALS,
@@ -215,16 +204,17 @@ if __name__ == "__main__": # main function
 		dist_bottomcar_to_axlemidpt,
 		dist_backofcar_tofrontaxle,
 		),
-		interval = 500,
+		interval = 100,
 		blit=True)
 	'''
+
+	ax.set_aspect(1)
 	label_str = "Parallel Parking Map (steer_ang ="
 	label_str = label_str + str(steer_ang) + ", d[c] = " + str(len_moveto_fup) + ")"
 	plt.title(label_str)
 	plt.ylabel("Y")
 	plt.xlabel("X")
 	plt.show()
-	'''
-	plt.show()
-	'''
+	
+
 
