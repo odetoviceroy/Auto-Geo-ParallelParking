@@ -94,13 +94,15 @@ def get_theta_fromarcheight(turn_radius, delta_y):
 	print "THETA: ", res
 	return res
 
-def fit_xf(c2, turn_radius, theta):
-	resx = c2.x + turn_radius * m.cos(-1 * (m.pi - (theta + m.pi/2)) - theta + m.pi/15)
-	resy = c2.y + turn_radius * m.sin(-1 * (m.pi - (theta + m.pi/2)) - theta + m.pi/15)
+def fit_xf(c2, turn_radius, theta, steer_ang):
+	resx = c2.x + turn_radius * m.cos(-1 * (m.pi - (theta + m.pi/2)) - theta + (steer_ang/1.5))
+	resy = c2.y + turn_radius * m.sin(-1 * (m.pi - (theta + m.pi/2)) - theta + (steer_ang/1.5))
 	print "FITTED XF COORDINATE:(", resx, ",", resy, ")"
 	return Coordinate(resx,resy)
 
-def gen_end_effector(lamb_da, curr_car_angs, FINALX_VAL, FINALY_VAL, dist_bottomcar_to_axlemidpt, dist_backofcar_tofrontaxle):
+def gen_end_effector(lamb_da, curr_car_angs, FINALX_VAL, FINALY_VAL, 
+	dist_bottomcar_to_axlemidpt, dist_backofcar_tofrontaxle):
+
 	lamb_da = curr_car_angs
 	phi1 = lamb_da - m.pi/2
 	phi2 = lamb_da - m.pi
