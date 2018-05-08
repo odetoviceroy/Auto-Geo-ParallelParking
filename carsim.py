@@ -117,11 +117,11 @@ if __name__ == "__main__": # main function
 
 	turn_radius = uf.get_turn_radius(axle_len, steer_ang) # figure out initial turn radius
 
-	err_len = 0.2 # use this to get the closest we can get to the back car
+	err_len = 0.25 # use this to get the closest we can get to the back car
 
 	xf = uf.gen_xf(backcar, err_len, dist_backofcar_tobackaxle, axle_len) # figure out final position of midbackaxle
 
-	plt.plot([xf.x],[xf.y], "rp")
+	plt.plot([xf.x],[xf.y], "gp")
 
 	c1 = uf.gen_c1(frontcar, movecar.frontaxle_midpt, turn_radius) # generate center of circle 1
 
