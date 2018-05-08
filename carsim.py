@@ -10,29 +10,6 @@ from ppobjs import Coordinate
 import utilfuncts as uf
 import drawfuncts as df
 
-'''
-fig = plt.figure()
-ax = plt.axes(xlim = (-2.0,2.5), ylim = (-2.0,2.0))
-ax.set_aspect(1)
-'''
-'''
-def init():
-	ax.add_patch(patch)
-	ax.add_patch(patch2)
-	ax.add_patch(patch3)
-	return patch, patch2, patch3 
-
-def animate(i, FINALX_VALS, FINALY_VALS, theta, f_bup, f_bdown, b_bup, b_bdown, car_angs):
-	patch.set_xy([FINALX_VALS[i], FINALY_VALS[i]])
-	patch2.set_xy([f_bup,f_bdown])
-	patch3.set_xy([b_bup,b_bdown])
-	deg = np.rad2deg(car_angs[i])
-	#patch._angle(deg)
-	#print deg
-	return patch, patch2, patch3
-
-'''
-
 fig, ax = plt.subplots()
 #ax = plt.axes(xlim = (0,3), ylim = (0,3))
 xfixdata, yfixdata = 14, 8
@@ -49,15 +26,11 @@ def init():
 	'''
 	ax.set_aspect(1)
 	ax.add_patch(patch)
-	return patch,
+	ax.add_patch(patch2)
+	ax.add_patch(patch3)
+	return patch, patch2, patch3, 
 
 def update(i, movecar, FINALX_VALS, FINALY_VALS, car_angs, dist_bottomcar_to_axlemidpt, dist_backofcar_tofrontaxle):
-	'''
-	ln.set_data([FINALX_VALS[frame]],[FINALY_VALS[frame]])
-	movecar.setOrientation(car_angs[frame])
-	[move_x, move_y] = movecar.genGraphPts()
-	plt.plot([move_x],[move_y], "rp")
-	'''
 
 	lamb_da = car_angs[i]
 	phi1 = lamb_da - m.pi/2
@@ -75,6 +48,7 @@ def update(i, movecar, FINALX_VALS, FINALY_VALS, car_angs, dist_bottomcar_to_axl
 		)
 	patch.set_width(movecar.len_car)
 	patch.set_height(movecar.width_car)
+
 	'''
 	ts = ax.transData
 	coords = ts.transform([end_effector.x, end_effector.y])
@@ -97,20 +71,8 @@ def update(i, movecar, FINALX_VALS, FINALY_VALS, car_angs, dist_bottomcar_to_axl
 	print "FIRST_JOINT X:",  first_joint.x, "\tFIRST_JOINT Y:", first_joint.y
 	print "SECOND_JOINT X:",  second_joint.x, "\tSECOND_JOINT Y:", second_joint.y
 	print "END EFFECTOR X:",  end_effector.x, "\tENDEFFECTOR Y:", end_effector.y, "\n-----------"
-	return patch,
-	'''
-	ts = ax.transData
-	tr = mpl.transforms.Affine2D().rotate_deg_around(0.2,0.5,10)
-	t= ts + tr
-	
-	t2 = mpl.transforms.Affine2D().rotate_deg(-45) + ax.transData
-	patch.set_transform(t2)
-	
-	
-	return patch,
-    ydata = list_var_points[frame]
-    ln.set_data([xfixdata,xdata], [yfixdata,ydata])
-    '''
+	return patch, patch2, patch3
+
 
 
 if __name__ == "__main__": # main function
@@ -132,7 +94,7 @@ if __name__ == "__main__": # main function
 	# ----------------------------------------------------------------------------
 	# ------------- DEFINE PRELIMINARY CONSTRAINTS TO LOCATE MOVING CAR ----------
 	parkspace_len =  uf.get_parkspace_len(frontcar, backcar) # DEFINE PARKING SPACE LENGTH
-	len_moveto_fup = .45 # LENGTH OF BACK OF MOVING CAR TO FRONT STATIC CAR
+	len_moveto_fup = .2 # LENGTH OF BACK OF MOVING CAR TO FRONT STATIC CAR
 	# ----------------------------------------------------------------------------
 	# --------- DEFINE ALL PRELIMINARY COMPUTATIONS OF THE MOVING CAR ------------
 	bbotm_coordy = frontcar.b_up.y + len_moveto_fup
@@ -155,9 +117,11 @@ if __name__ == "__main__": # main function
 
 	turn_radius = uf.get_turn_radius(axle_len, steer_ang) # figure out initial turn radius
 
-	err_len = 0.22 # use this to get the closest we can get to the back car
+	err_len = 0.2 # use this to get the closest we can get to the back car
 
 	xf = uf.gen_xf(backcar, err_len, dist_backofcar_tobackaxle, axle_len) # figure out final position of midbackaxle
+
+	plt.plot([xf.x],[xf.y], "rp")
 
 	c1 = uf.gen_c1(frontcar, movecar.frontaxle_midpt, turn_radius) # generate center of circle 1
 
@@ -193,11 +157,16 @@ if __name__ == "__main__": # main function
 
 	[arc1x_vals, arc1y_vals] = df.generate_arc(c1.x, c1.y, theta, turn_radius, 1, dist_bottomcar_to_axlemidpt)
 	[arc2x_vals, arc2y_vals] = df.generate_arc(c2.x, c2.y, theta, turn_radius, 2, dist_bottomcar_to_axlemidpt)
+
+	movecar.setFrontAxle(arc2x_vals[0], arc2y_vals[0])
+	[m_forwardx, m_forwardy] = uf.drive_car_forwards(movecar, err_len)
+	print "HAAAA:", m_forwardx
 	plt.plot([arc1x_vals], [arc1y_vals], "m+")
 	plt.plot([arc2x_vals], [arc2y_vals], "m+")
-	[FINALX_VALS, FINALY_VALS] = df.trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals)
+	plt.plot([m_forwardx], [m_forwardy], "m+")
+	[FINALX_VALS, FINALY_VALS] = df.trace_path(arc1x_vals, arc1y_vals, arc2x_vals, arc2y_vals, m_forwardx, m_forwardy)
 	#plt.plot([FINALX_VALS],[FINALY_VALS], "m+")
-	total_len = len(arc1x_vals) + len(arc2x_vals)
+	total_len = len(arc1x_vals) + len(arc2x_vals) + len(m_forwardx)
 	# -----------------------------------------------------------------------------
 	# -----------------------------------------------------------------------------
 	# -----------------------------------------------------------------------------
@@ -211,37 +180,25 @@ if __name__ == "__main__": # main function
 	# -----------------------------------------------------------------------------
 	'''
 
+	'''
 	[fx, fy] = frontcar.genGraphPts()
 	[bx, by] = backcar.genGraphPts()
 	[move_x, move_y] = movecar.genGraphPts()
-
 
 	print "FRONT CAR:", move_x, "\t", "BACK CAR:", move_y
 	print "INITIAL BACKAXLE MIDPT:(", movecar.backaxle_midpt.x, ", ", movecar.backaxle_midpt.y, ")"
 	plt.plot([fx],[fy], "rp")
 	plt.plot([bx],[by], "rp")
 	plt.plot([move_x],[move_y], "rp")
+	'''
 
 	car_angs = uf.gen_angles(FINALX_VALS, FINALY_VALS)
-	print car_angs
+	print "CAR_ANGS(RAD):",car_angs
+	patch2 = patches.Rectangle((frontcar.b_down.x, frontcar.b_down.y), movecar.len_car, movecar.width_car, 
+		fc='rebeccapurple', alpha = .5)
+	patch3 = patches.Rectangle((backcar.b_down.x, backcar.b_down.y), movecar.len_car, movecar.width_car, 
+		fc = 'limegreen', alpha = .5)
 
-
-	
-	
-	'''
-	patch2 = patches.Rectangle((frontcar.b_down.x, frontcar.b_down.y), movecar.len_car, movecar.width_car, fc='rebeccapurple')
-	patch3 = patches.Rectangle((backcar.b_down.x, backcar.b_down.y), movecar.len_car, movecar.width_car, fc = 'limegreen')
-	ani = animation.FuncAnimation(fig, animate, init_func=init, frames= total_len, fargs = (
-		FINALX_VALS,
-		FINALY_VALS,
-		theta,
-		frontcar.b_down.x,
-		frontcar.b_down.y,
-		backcar.b_down.x,
-		backcar.b_down.y,
-		car_angs
-		), interval=200, blit=True)
-	'''
 	ani = animation.FuncAnimation(fig, update, init_func=init, frames= total_len, fargs = (
 		movecar,
 		FINALX_VALS,
@@ -250,6 +207,7 @@ if __name__ == "__main__": # main function
 		dist_bottomcar_to_axlemidpt,
 		dist_backofcar_tofrontaxle,
 		),
+		interval = 100,
 		blit=True)
 
 	plt.show()
