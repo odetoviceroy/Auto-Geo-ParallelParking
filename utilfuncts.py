@@ -100,6 +100,22 @@ def fit_xf(c2, turn_radius, theta):
 	print "FITTED XF COORDINATE:(", resx, ",", resy, ")"
 	return Coordinate(resx,resy)
 
+def gen_end_effector(lamb_da, curr_car_angs, FINALX_VAL, FINALY_VAL, dist_bottomcar_to_axlemidpt, dist_backofcar_tofrontaxle):
+	lamb_da = curr_car_angs
+	phi1 = lamb_da - m.pi/2
+	phi2 = lamb_da - m.pi
+
+	first_joint = Coordinate(FINALX_VAL, FINALY_VAL)
+	second_joint = Coordinate(
+		first_joint.x + dist_bottomcar_to_axlemidpt * m.cos(phi1),
+		first_joint.y + dist_bottomcar_to_axlemidpt * m.sin(phi1),
+		)
+	return Coordinate(
+		second_joint.x + dist_backofcar_tofrontaxle * m.cos(phi2),
+		second_joint.y + dist_backofcar_tofrontaxle * m.sin(phi2)
+
+		)
+
 def drive_car_forwards(movecar, err_len):
 	x_vals = []
 	y_vals = []
