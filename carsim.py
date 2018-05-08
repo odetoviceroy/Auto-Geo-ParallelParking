@@ -112,9 +112,9 @@ if __name__ == "__main__": # main function
 
 	c1 = uf.gen_c1(frontcar, movecar.frontaxle_midpt, turn_radius) # generate center of circle 1
 
-	delta_x = uf.gen_delta_x(movecar.backaxle_midpt, xf)
+	delta_x = uf.gen_delta_x(movecar.frontaxle_midpt, xf)
 
-	delta_y = uf.gen_delta_y(movecar.backaxle_midpt, xf)
+	delta_y = uf.gen_delta_y(movecar.frontaxle_midpt, xf)
 
 	#theta = uf.get_theta(delta_x, turn_radius)
 
