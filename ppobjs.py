@@ -57,6 +57,18 @@ class Car:
 		self.b_down.y = yvalue
 		self.updateFrontBackAxle()
 
+	def drive_forward(self, distance):
+		self.f_up = self.set_fup(self.f_up.x + distance, 0)
+		self.f_down = self.set_fdown(self.f_down.x + distance, 0)
+		self.b_up = self.set_bup(self.b_up.x + distance, 0)
+		self.b_down = self.set_bdown(self.b_down.x + distance, 0)
+		return self.genGraphPts()
+
+	def setFrontAxle(self, xvalue, yvalue):
+		self.frontaxle_midpt = Coordinate(xvalue, yvalue)
+		return self		
+
+	'''
 	def setOrientation(self,theta):
 		self.f_down.x = self.b_down.x + self.len_car * m.cos(theta)
 		self.f_up.x = self.b_up.x + self.len_car * m.cos(theta)
@@ -69,3 +81,4 @@ class Car:
 		self.frontaxle_midpt.x = bottom_midpoint.x + 4 * (self.len_car / 5.0) * m.cos(theta)
 		self.frontaxle_midpt.y = bottom_midpoint.y + 4* (self.len_car / 5.0) * m.sin(theta)
 		return self
+	'''
