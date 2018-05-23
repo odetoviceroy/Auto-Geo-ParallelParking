@@ -26,7 +26,8 @@ def init():
 
 	return patch, patch2, patch3, 
 
-def update(i, movecar, FINALX_VALS, FINALY_VALS, car_angs, dist_bottomcar_to_axlemidpt, dist_backofcar_tofrontaxle):
+def update(i, movecar, FINALX_VALS, FINALY_VALS, car_angs, dist_bottomcar_to_axlemidpt, dist_backofcar_tobackaxle,
+	curbdanger_zone):
 
 	lamb_da = car_angs[i]
 	phi1 = lamb_da - m.pi/2
@@ -38,16 +39,23 @@ def update(i, movecar, FINALX_VALS, FINALY_VALS, car_angs, dist_bottomcar_to_axl
 		first_joint.y + dist_bottomcar_to_axlemidpt * m.sin(phi1),
 		)
 	end_effector = Coordinate(
-		second_joint.x + dist_backofcar_tofrontaxle * m.cos(phi2),
-		second_joint.y + dist_backofcar_tofrontaxle * m.sin(phi2)
-
+		second_joint.x + dist_backofcar_tobackaxle * m.cos(phi2),
+		second_joint.y + dist_backofcar_tobackaxle * m.sin(phi2)
 		)
+
 
 	patch.set_width(movecar.len_car)
 	patch.set_height(movecar.width_car)
 	end_effector = uf.gen_end_effector(lamb_da, car_angs[i], FINALX_VALS[i], FINALY_VALS[i], 
-		dist_bottomcar_to_axlemidpt, dist_backofcar_tofrontaxle)
+		dist_bottomcar_to_axlemidpt, dist_backofcar_tobackaxle)
 	
+	'''
+	if(lamb_da != m.pi/2):
+		while end_effector.y <= curbdanger_zone.y:
+			lamb_da = lamb_da - m.pi/20
+			end_effector = uf.gen_end_effector(lamb_da, car_angs[i], FINALX_VALS[i], FINALY_VALS[i], 
+			dist_bottomcar_to_axlemidpt, dist_backofcar_tofrontaxle)
+	'''	
 
 	t2 = mpl.transforms.Affine2D().rotate_deg_around(end_effector.x, end_effector.y, np.rad2deg(lamb_da)) + ax.transData
 	patch.set_transform(t2)
@@ -79,16 +87,17 @@ if __name__ == "__main__": # main function
 	# ----------------------------------------------------------------------------
 	# ------------- DEFINE PRELIMINARY CONSTRAINTS TO LOCATE MOVING CAR ----------
 	parkspace_len =  uf.get_parkspace_len(frontcar, backcar) # DEFINE PARKING SPACE LENGTH
-	len_moveto_fup = .22 # LENGTH OF BACK OF MOVING CAR TO FRONT STATIC CAR
+	len_moveto_fup = .33 # LENGTH OF BACK OF MOVING CAR TO FRONT STATIC CAR
 	# ----------------------------------------------------------------------------
 	# --------- DEFINE ALL PRELIMINARY COMPUTATIONS OF THE MOVING CAR ------------
 	bbotm_coordy = frontcar.b_up.y + len_moveto_fup
 	btop_coordy = bbotm_coordy + frontcar.width_car
 	fbotm_coordy = frontcar.f_up.y + len_moveto_fup
 	ftop_coordy = fbotm_coordy + frontcar.width_car
+	movecarx = frontcar.b_up.x + (4.0 * lencar_part)
 	movecar = Car(
-		Coordinate(frontcar.f_up.x,ftop_coordy), Coordinate(frontcar.f_up.x,fbotm_coordy), 
-		Coordinate(frontcar.b_up.x,btop_coordy), Coordinate(frontcar.b_up.x,bbotm_coordy)
+		Coordinate(movecarx + backcar.len_car,ftop_coordy), Coordinate(movecarx + backcar.len_car,fbotm_coordy), 
+		Coordinate(movecarx,btop_coordy), Coordinate(movecarx,bbotm_coordy)
 	)
 	# -----------------------------------------------------------------------------
 	# ----------- FIGURE OUT INITIAL COORDINATES OF AXLE MIDPOINTS ----------------
@@ -104,17 +113,17 @@ if __name__ == "__main__": # main function
 
 	err_len = 0.2 # use this to get the closest we can get to the back car
 
-	xf = uf.gen_xf(backcar, err_len, dist_backofcar_tobackaxle, axle_len) # figure out final position of midbackaxle
+	xf = uf.gen_xf(backcar, err_len, dist_backofcar_tobackaxle) # figure out final position of midbackaxle
 
 	xf_backup = Coordinate(xf.x, xf.y)
 
 	plt.plot([xf.x],[xf.y], "gp")
 
-	c1 = uf.gen_c1(frontcar, movecar.frontaxle_midpt, turn_radius) # generate center of circle 1
+	c1 = uf.gen_c1(frontcar, movecar.backaxle_midpt, turn_radius) # generate center of circle 1
 
-	delta_x = uf.gen_delta_x(movecar.frontaxle_midpt, xf)
+	delta_x = uf.gen_delta_x(movecar.backaxle_midpt, xf)
 
-	delta_y = uf.gen_delta_y(movecar.frontaxle_midpt, xf)
+	delta_y = uf.gen_delta_y(movecar.backaxle_midpt, xf)
 
 	#theta = uf.get_theta(delta_x, turn_radius)
 
@@ -131,15 +140,15 @@ if __name__ == "__main__": # main function
 	print uf.check_arcs_toobig(delta_y, turn_radius)
 	# -----------------------------------------------------------------------------
 	[c1x, c1y] = df.sketch_circle(c1, turn_radius)
-	plt.plot([c1x],[c1y], "b.")
+	plt.plot([c1x],[c1y], "b*")
 	[c2x, c2y] = df.sketch_circle(c2, turn_radius)
-	plt.plot([c2x],[c2y], "r.")
+	plt.plot([c2x],[c2y], "r*")
 	plt.plot([c1.x],[c1.y],"b+")
 	plt.plot([c2.x],[c2.y], "r+")
 
 	plt.plot([c1.x + turn_radius * (m.cos(theta))],[c1.y + turn_radius * (m.sin(theta))], "g+")
 	plt.plot([c1.x + turn_radius * m.cos(theta)],[c1.y + turn_radius * m.sin(-theta)], "r+")
-	plt.plot([xm.x],[xm.y], "g^")
+	plt.plot([xm.x],[xm.y], "g+")
 	plt.plot([xf.x],[xf.y], "g^")
 
 	[arc1x_vals, arc1y_vals] = df.generate_arc(c1.x, c1.y, theta, turn_radius, 1, dist_bottomcar_to_axlemidpt, steer_ang)
@@ -187,26 +196,31 @@ if __name__ == "__main__": # main function
 	patch3 = patches.Rectangle((backcar.b_down.x, backcar.b_down.y), movecar.len_car, movecar.width_car, 
 		fc = 'limegreen', alpha = .45)
 
+	curbdanger_zone = Coordinate(0.0, 0.0 + err_len)
 	
 	df.gen_skeletongraph(ax, frontcar, backcar, movecar,
 		FINALX_VALS,
 		FINALY_VALS,
 		car_angs,
 		dist_bottomcar_to_axlemidpt,
-		dist_backofcar_tofrontaxle,)
+		dist_backofcar_tobackaxle,
+		curbdanger_zone
+		)
 	
-	'''
+	
+	
 	ani = animation.FuncAnimation(fig, update, init_func=init, frames= total_len, fargs = (
 		movecar,
 		FINALX_VALS,
 		FINALY_VALS,
 		car_angs,
 		dist_bottomcar_to_axlemidpt,
-		dist_backofcar_tofrontaxle,
+		dist_backofcar_tobackaxle,
+		curbdanger_zone
 		),
 		interval = 100,
 		blit=True)
-	'''
+	
 
 	ax.set_aspect(1)
 	label_str = "Parallel Parking Map (steer_ang ="
